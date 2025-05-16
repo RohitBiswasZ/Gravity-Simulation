@@ -1,5 +1,7 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class ProcedrualPlanet : MonoBehaviour
 {
@@ -13,6 +15,10 @@ public class ProcedrualPlanet : MonoBehaviour
     [Header("Debug")]
     
     [Range(0.01f,1f)] public float vertexRadius;
+    [Min(0)] public float vertexAnimateTime;
+    public Color vertexColor;
+    [FormerlySerializedAs("BoxOutlineColor")] [FormerlySerializedAs("BoxOutline")] public Color boxOutlineColor;
+    List<Vector3> aniVertex = new List<Vector3>();
     
     public void Start()
     {
@@ -24,8 +30,12 @@ public class ProcedrualPlanet : MonoBehaviour
         mData = new MeshData();
         mData.mesh = new Mesh();
 
-        mData.CreateCubicFace(resulation, radius, Vector3.zero);
+        Vector3 calOffset = new Vector3(radius / 2f, radius / 2f, radius / 2f);
+        mData.CreateCubicFace(resulation, radius, -calOffset);
         mData.UpdateMesh();
+        
+        StopAllCoroutines();
+        StartCoroutine(UpdateAnimatedVertex(mData.vertex, vertexAnimateTime));
     }
 
     public void OnValidate()
@@ -34,8 +44,22 @@ public class ProcedrualPlanet : MonoBehaviour
         mData = new MeshData();
         mData.mesh = new Mesh();
 
-        mData.CreateCubicFace(resulation, radius, Vector3.zero);
-        mData.UpdateMesh();
+        Vector3 calOffset = new Vector3(radius / 2f, radius / 2f, radius / 2f);
+        mData.CreateCubicFace(resulation, radius, -calOffset);
+        
+        aniVertex.Clear();
+        StopAllCoroutines();
+        StartCoroutine(UpdateAnimatedVertex(mData.vertex, vertexAnimateTime));
+    }
+
+    IEnumerator UpdateAnimatedVertex(List<Vector3> vertexList, float t)
+    {
+        for (int i = 0; i < vertexList.Count; i++)
+        {
+            Vector3 vertex = vertexList[i];
+            aniVertex.Add(vertex);
+            yield return new WaitForSeconds(t);
+        }
     }
 
     public void OnDrawGizmos()
@@ -43,14 +67,18 @@ public class ProcedrualPlanet : MonoBehaviour
         if (!Application.isPlaying) return;
         if (mData.vertex.Count > 0 && mData.vertex != null && mData != null)
         {
-            float cordStep = (float)radius / resulation;
-            Gizmos.color = Color.black;
+            Gizmos.color = boxOutlineColor;
+            Gizmos.DrawWireCube(Vector3.zero, Vector3.one * radius);
             
-            for (int i = 0; i < mData.vertex.Count; i++)
+            float cordStep = (float)radius / resulation;
+            Gizmos.color = vertexColor;
+            
+            for (int i = 0; i < aniVertex.Count; i++)
             {
-                Vector3 position = mData.vertex[i];
+                Vector3 position = aniVertex[i];
                 Gizmos.DrawSphere(position, vertexRadius * cordStep);
             }
+            
         }
     }
 }

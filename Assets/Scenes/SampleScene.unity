@@ -456,6 +456,9 @@ MonoBehaviour:
   resulation: 20
   radius: 5
   vertexRadius: 0.1
+  vertexAnimateTime: 0.05
+  vertexColor: {r: 0, g: 0, b: 0, a: 1}
+  boxOutlineColor: {r: 0.6792453, g: 0.6792453, b: 0.6792453, a: 0.7019608}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
